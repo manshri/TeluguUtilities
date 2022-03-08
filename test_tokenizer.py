@@ -1,6 +1,7 @@
-from tokenizer import *
+from TeluguTokenizer.tokenizer import *
 import sys
 import codecs
+
 
 ### Testing the tokenizer with command line arguments.
 no_tokens = 0
