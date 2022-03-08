@@ -54,7 +54,11 @@ def trivial_tokenize_indic(text):
     s = new_s
 
     '''
-    The following code is to handle the case of more than two dots. In such cases, each dot is considered as a new sentence. To avoid that if previous word is a dot and current word is a dot then sentence split should not happen. (assuming  consequtive dots are not the end of sentence). Also, combined the consequitive similar puntuations as single token
+    The following code is to handle the case of more than two dots. 
+    Usually, in such a case, each dot is considered as a sentence break. 
+    Based on the hypothesis that consecutive dots do not all mark the end of sentence individually.
+    This method avoids breaking the sentence at each dot, by adding a rule: "if previous word is a dot and current word is a dot then sentence split should not happen."
+    Also, combined the consecuitive similar puntuations as single token
     '''
     tokens = re.split(r'[ ]',s)
 
