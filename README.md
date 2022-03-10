@@ -17,3 +17,13 @@ To test the telugu tokenizer, use the code file test_tokenizer.py with the follo
 ```
 	>>> python3 test_tokenizer.py <telugu-text> 'text'
 ```
+#### Usage
+
+To make use of this repository, you should git-clone it inside your project repository.
+After that you can simply import desired methods. 
+
+For example:
+	**importing tokenizer**
+```
+	from TeluguUtilities.TeluguTokenizer import tokenizer as t
+```
