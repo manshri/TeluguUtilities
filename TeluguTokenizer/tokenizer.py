@@ -20,13 +20,10 @@ acronyms = ["రు","కి","మీ","మి","సెం","రా","సా","�
 EndPunctuation = re.compile(r"("+("|".join(acronyms))+")+\s*")
 
 
-def trivial_tokenize_indic(text):
+def tokenize(text):
     """tokenize string for Indian language scripts using Brahmi-derived scripts
 
-    A trivial tokenizer which just tokenizes on the punctuation boundaries. 
-    This also includes punctuations for the Indian language scripts (the 
-    purna virama and the deergha virama). This is a language independent 
-    tokenizer
+    This tokenizer just tokenizes on the punctuation boundaries. This also includes punctuations for the Indian language scripts (the purna virama and the deergha virama). This is a language independent tokenizer
 
     Args:
         text (str): text to tokenize
@@ -54,11 +51,7 @@ def trivial_tokenize_indic(text):
     s = new_s
 
     '''
-    The following code is to handle the case of more than two dots. 
-    Usually, in such a case, each dot is considered as a sentence break. 
-    Based on the hypothesis that consecutive dots do not all mark the end of sentence individually.
-    This method avoids breaking the sentence at each dot, by adding a rule: "if previous word is a dot and current word is a dot then sentence split should not happen."
-    Also, combined the consecuitive similar puntuations as single token
+    The following code is to handle the case of more than two dots. In such cases, each dot is considered as a new sentence. To avoid that if previous word is a dot and current word is a dot then sentence split should not happen. (assuming  consequtive dots are not the end of sentence). Also, combined the consequitive similar puntuations as single token
     '''
     tokens = re.split(r'[ ]',s)
 
@@ -132,17 +125,18 @@ def preprocess_data(data):
 
 
 
-def sentence_tokenize(data):
+def sentence_tokenize(data, return_count=False):
     """Sentence tokenizer takes the text as input and return the list of sentences. This sentence_tokenize methods initially apply the modified indic word tokenizer and use the hand-crafted rules to split the given text into list of sentences
 
     Args:
         data (str): text to apply sentencification
+        return_count (bool): Flag to return the number of sentences
 
     Returns:
         list: list of sentences
 
     """
-    words = trivial_tokenize_indic(data) ### List of tokens seperated by space
+    words = tokenize(data) ### List of tokens seperated by space
     sentences = []
     
     ### Sentence begin, end and sentence break flag.
@@ -155,11 +149,18 @@ def sentence_tokenize(data):
     next_word = ""
     prev_word = ""
 
+    ### List of characters to omit as previous word
+    exclude_prev_chars = [".", ", ", " "]
+
+    ### List of end of sentence chars
+    end_of_sen_chars = ['.', '\n', '\r', '?', '!']
+
     i = 1
     while(i<len(words)):
 
         ### Finiding out the previous word index
-        if words[i-1]!="." and words[i-1]!=" " and words[i-1]!=",":
+        # if words[i-1]!="." and words[i-1]!=" " and words[i-1]!=",":
+        if words[i-1] not in exclude_prev_chars:
             prev = i-1
         else:
             prev = i-2
@@ -175,25 +176,33 @@ def sentence_tokenize(data):
         content within the quotes as single sentence.
         '''
         ### Checking for the quotes
-        if words[i-1]=='"':
+        if '"' in prev_word:
             temp_index = i
             while(temp_index<len(words)):
-                if(words[temp_index]=='"'):
+                if('"' in words[temp_index]):
                     end = temp_index + 1
                     i = end
                     prev_word = words[i-1]
-                    curr_word = words[i]
+                    if(i<len(words)):
+                        curr_word = words[i]
+                    else:
+                        curr_word = ""
+                        break_sen = True
                     break
                 temp_index += 1
 
-        if prev_word=="'":
+        if "'" in prev_word:
             temp_index = i
             while(temp_index<len(words)):
-                if(words[temp_index]=="'"):
+                if("'" in words[temp_index]):
                     end = temp_index + 1
                     i = end
                     prev_word = words[i-1]
-                    curr_word = words[i]
+                    if(i<len(words)):
+                        curr_word = words[i]
+                    else:
+                        curr_word = ""
+                        break_sen = True
                     break
                 temp_index += 1
         '''
@@ -201,8 +210,20 @@ def sentence_tokenize(data):
         '''
 
 
-        ### Checking if the current word is a sentence break then previous word should not be an acronym.
-        if((curr_word=='.' or curr_word=="\n" or curr_word=="\r") and i>0):
+        ### Checking if the current word is a sentence break (only for dot symbols) then previous word should not be an acronym.
+        flag = False
+        for end_of_sen in end_of_sen_chars:
+            if end_of_sen in curr_word:
+                if end_of_sen==".":
+                    if end_of_sen==curr_word:
+                        flag=True
+                        break
+                else:
+                    flag = True
+                    break
+
+
+        if(flag==True and i>0):
             temp = EndPunctuation.search(prev_word)
             match_word = ""
             if temp is not None:
@@ -231,17 +252,21 @@ def sentence_tokenize(data):
     if(len(sent)>=1 and (sent!="\n" and sent!="\t" and sent!=" ")):
         sentences.append(sent)
 
-    return sentences
+    if(return_count):
+        return sentences, len(sentences)
+    else:
+        return sentences
 
 
 
-def word_tokenize(sent_list):
+def word_tokenize(sent_list, return_count=False):
     """Word tokenizer takes the list of sentences as input and return the list of list of tokens as output
 
     This word_tokenize method initially apply the indic word tokenizer.
 
     Args:
         sent_list (list): list of sentences (output of sentence_tokenize)
+        return_count (bool): Flag to return the number of tokens
 
     Returns:
         list: list of tokens
@@ -260,19 +285,24 @@ def word_tokenize(sent_list):
         sent = sent_list[i]
 
         ### Applied the modified indic tokenizer for the sentence
-        words = trivial_tokenize_indic(sent)
+        words = tokenize(sent)
 
         ### Adding all tokens to the token list
         tokens.extend(words)
-    return tokens
+
+    if(return_count):
+        return tokens, len(tokens)
+    else:
+        return tokens
 
 
 ### Function to remove punctuations from the token list
-def remove_punctuation(tokens):
+def remove_punctuation(tokens, return_count=False):
     """This method takes the list of tokens as input and return the list of cleaned tokens (punctuations will be replaced with null) as output.
 
     Args:
         tokens (list): list of tokens (output of word_tokenize)
+        return_count (bool): Flag to return the number of tokens
 
     Returns:
         list: list of cleaned tokens
@@ -291,4 +321,7 @@ def remove_punctuation(tokens):
         if token!="":
             cleaned_tokens.append(token)
 
-    return cleaned_tokens
+    if(return_count):
+        return cleaned_tokens, len(cleaned_tokens)
+    else:
+        return cleaned_tokens
