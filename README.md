@@ -8,14 +8,14 @@ This module modifies an exisiting tokenizer for better efficiency, by adding han
 
 To test the telugu tokenizer, use the code file test_tokenizer.py with the following commands.
 
-	**file as an argument**
+	
 ```
-	>>> python3 test_tokenizer.py test_samples/example_2.txt 'file'
+	$ python3 test_tokenizer.py test_samples/example_2.txt <file-name>
 ```
-
-	**text as an argument**
+OR
+	
 ```
-	>>> python3 test_tokenizer.py <telugu-text> 'text'
+	$ python3 test_tokenizer.py <telugu-text> 'text'
 ```
 #### Usage
 
@@ -23,7 +23,6 @@ To make use of this repository, you should git-clone it inside your project repo
 After that you can simply import desired methods. 
 
 For example:
-	**importing tokenizer**
 ```
-	from TeluguUtilities.TeluguTokenizer import tokenizer as t
+	>>> from TeluguUtilities.TeluguTokenizer import tokenizer as t
 ```
