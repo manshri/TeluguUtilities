@@ -19,10 +19,16 @@ OR
 ```
 #### Usage
 
-To make use of this repository, you should git-clone it inside your project repository.
+To make use of this repository, git-clone it inside your project repository.
 After that you can simply import desired methods. 
 
 For example:
 ```
 	>>> from TeluguUtilities.TeluguTokenizer import tokenizer as t
+```
+## 2. Indic Transliterator
+
+```
+	>>> from TeluguUtilities.utils import transliterator
+	>>> demo(lang='te_IN')
 ```

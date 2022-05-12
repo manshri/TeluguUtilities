@@ -72,11 +72,11 @@ def read_jsonl_to_dataframe(infile):
     return df
 
 
-""" ------------------------- PANDAS DataFrames <==> JSON ----------------------------- """
+""" ------------------------- PANDAS DataFrames <==> JSON ----------------------------- 
 
 # Write pandas dataframe to JSON file
 def writeDF_to_json(df, outfile):
-    result = df.to_json(outfile, orient = 'split', force_ascii=False, compression = 'infer')
+    result = df.to_json(orient = 'index', force_ascii=False, compression = 'infer')
     parsed = json.loads(result)
     json.dump(parsed, outfile, ensure_ascii=False)
 
@@ -85,7 +85,7 @@ def writeDF_to_json(df, outfile):
 def read_json_to_dataframe(infile):
     df = pd.read_json(infile, orient='records', encoding='utf-8')
     return df
-
+"""
 
 ''' ** Initialize dataframe with list-of-dicts **
 
@@ -98,5 +98,36 @@ df = pd.DataFrame(sample_data)
 # Convert dataframe to list-of-dicts
 sample_data = df.to_dict('records')
 
+
+
+# compute frequency/count of each class (eg. number-of-sentences, number-of-questions etc.)
+# class-weight = percentage of each class (frequency-of-class-A / total-number-of-samples)
+# save class-weights to dataframe:
+    option 1:
+        class-A : frequency_Column = weight-A
+        class-B : frequency_Column = weight-B
+        ..
+        use df.sample(n,weights=frequency_Column, random_state=1)
+
+    option 2:
+        ** make sub-frames based on class labels ------------
+        dfa = df[df['class']=='A']
+        dfb = df[df['class']=='B']
+        dfc = df[df['class']=='C']
+
+        compute: na = n * class-weightA
+                 nb = n * class-weightB
+        and then
+                 dfa.sample(na, random_state=1)
+                 dfb.sample(nb, random_state=1)
+
+------------------------ Sampling with frquency column of DataFrames -------------------------
+
+# df = your data as pandas dataframe
+# n = number to samples to select
+# weights = a column with frequency/weights; higher weights = higher probabilty of selection
+# random_state = 1 for reproducability
+
+df.sample(n=2, weights='frequency', random_state=1)
 
 '''

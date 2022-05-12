@@ -57,10 +57,12 @@ def add_Metrics(pairs, drop_index=False):
     
     summary_tokens = indic_tokenize.trivial_tokenize(each['summary'])
     article_tokens = indic_tokenize.trivial_tokenize(each['text'])
+    title_tokens = indic_tokenize.trivial_tokenize(each.get('title', ''))
 
 
     article_len = len(article_tokens)
     summary_len = len(summary_tokens)
+    title_len = len(title_tokens)
 
     total_stokens = len(summary_tokens)
     
@@ -78,7 +80,7 @@ def add_Metrics(pairs, drop_index=False):
       abstractivity.append(round((100 - (sumF_abs/total_stokens)*100), 2))
     
     new_pair = dict(each)
-    new_pair.update({'sent_count': len(article_sents), 'article_len': article_len, 'summary_len': summary_len, 'compression': compression, 'abstractivity': abstractivity[0], 'abstractivity-1': abstractivity[1], 'abstractivity-2': abstractivity[2], 'abstractivity-3': abstractivity[3]})
+    new_pair.update({'article_sentence_count': len(article_sents), 'article_token_count': article_len, 'summary_token_count': summary_len, 'title_token_count': title_len, 'compression': compression, 'abstractivity': abstractivity[0], 'abstractivity-1': abstractivity[1], 'abstractivity-2': abstractivity[2], 'abstractivity-3': abstractivity[3]})
     final_pairs.append(new_pair)
     
   return final_pairs
